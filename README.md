@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 # Program rezervace letů/letenek
 
 ## Motivace:
