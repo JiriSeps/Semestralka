@@ -1,3 +1,0 @@
-Max,max@aol.com,id
-Ryan,ryan@gmail.com,id
-Steph,steph@hotmail.com,id

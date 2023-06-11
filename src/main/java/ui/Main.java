@@ -11,11 +11,17 @@ package ui;
 import util.Airport;
 import app.Flight;
 import app.Passenger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+
     public static Airport airport = new Airport();
-    static String email = "";
+    public static List<String> passengerData = new ArrayList<>();
+    public static List<String> addedFlightData = new ArrayList<>();
+    public static List<String> reservationData = new ArrayList<>();
+    public static String fileFormat;
 
     /**
      * Hlavní metoda programu.
@@ -24,12 +30,15 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        Flight.makeFlights();
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("\n Vítejte v rezervačním programu. Vyberte z následujících možností\n");
+        System.out.println("\n Vítejte v rezervačním programu. Chcete pracovat s datovými (.dat) nebo textovými (.txt) soubory?");
+        fileFormat = scanner.nextLine().toLowerCase();
+
+        System.out.println("Vyberte z následujících možností\n");
+        Flight.makeFlights();
         while (true) {
-            System.out.println("1. Zobrazení všech dostupných destinací \n2. Přidání destinace \n3. Přidání uživatele\n4. Rezervace letu\n5. Zrušení letů\n6. Vyhledat lety\n0. Exit");
+            System.out.println("1. Zobrazení všech dostupných destinací \n2. Přidání destinace \n3. Přidání uživatele\n4. Rezervace letu\n5. Zrušení letů\n6. Zrušení rezervovaných letů\n7. Vypsání rezervovaných letů\n8. Uložení dat\n0. Exit");
 
             System.out.println("Zadejte možnost zde: ");
             String userInput = scanner.nextLine();
@@ -52,19 +61,28 @@ public class Main {
                         Flight.cancelFlight();
                         break;
                     case 6:
-                        Flight.searchFlights();
+                        Passenger.cancelReservedFlights();
+                        break;
+                    case 7:
+                        Passenger.displayReservedFlightsSortedByDate();
+                        break;
+                    case 8:
+                        System.out.println("Chcete uložit data do formátu .txt nebo .dat (txt/bin)?");
+                        String format = scanner.nextLine();
+                        Airport.saveData(Main.reservationData, format, "reservedflights");
+                        Airport.saveData(Main.passengerData, format, "users");
+                        Airport.saveData(Main.addedFlightData, format, "flights");
                         break;
                     case 0:
+                        util.SoundPlayer.play("sound.wav");
+                        Thread.sleep(1500);
                         System.exit(0);
                     default:
-                        throw new Exception("Nesprávná možnost zadána, zkuste znovu.");
                 }
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 scanner.nextLine();
             }
         }
-
     }
-
 }
