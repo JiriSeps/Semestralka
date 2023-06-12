@@ -59,14 +59,6 @@ public class Flight implements Comparable<Flight> {
         this.destination = destination;
     }
 
-    /**
-     * Získá ID letu.
-     *
-     * @return ID letu
-     */
-    public UUID getFlightId() {
-        return flightId;
-    }
 
     /**
      * Získá seznam cestujících na letu.
@@ -91,9 +83,6 @@ public class Flight implements Comparable<Flight> {
      *
      * @param passenger Cestující
      */
-    public void removePassenger(Passenger passenger) {
-        this.passengers.remove(passenger);
-    }
 
     /**
      * Přepsaná metoda toString pro třídu Flight.
@@ -177,18 +166,6 @@ public class Flight implements Comparable<Flight> {
             System.out.println("Chyba při čtení souboru: " + fileName);
         }
         return destinations;
-    }
-
-    /**
-     * Metoda pro vyhledání letů.
-     */
-    public static void searchFlights() {
-        System.out.println("Chcete-li vyhledat lety, zadejte prosím destinaci");
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Zadejte destinaci: ");
-        String destination = scanner.nextLine();
-        Main.airport.searchFlights(destination);
-        System.out.println("\n Co chcete vybrat dál? Vyberte číslo od 0-6: \n");
     }
 
     /**

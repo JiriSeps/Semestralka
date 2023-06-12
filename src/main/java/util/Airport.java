@@ -92,16 +92,6 @@ public class Airport {
     }
 
     /**
-     * Zruší rezervaci cestujícího na letu.
-     *
-     * @param passenger Cestující
-     * @param flight Let
-     */
-    public void cancelPassengerBooking(Passenger passenger, Flight flight) {
-        flight.removePassenger(passenger);
-    }
-
-    /**
      * Zruší celý let.
      *
      * @param flight Let
@@ -117,23 +107,6 @@ public class Airport {
      */
     public void addFlight(Flight flight) {
         this.flights.add(flight);
-    }
-
-    /**
-     * Vyhledá lety podle destinace.
-     *
-     * @param destination Destinace letu
-     */
-    public void searchFlights(String destination) {
-        System.out.println("Let do " + destination + ": ");
-        for (Flight flight : flights) {
-            if (flight.getDestination().equals(destination)) {
-                System.out.println(flight.getDestination());
-            } else {
-                System.out.println("Omlouváme se, momentálně nejsou žádné dostupné lety do " + destination);
-                break;
-            }
-        }
     }
 
     /**
@@ -280,5 +253,18 @@ public class Airport {
         } catch (IOException e) {
             System.out.println("Chyba při zápisu do souboru: " + fileName);
         }
+    }
+
+    public static void help() {
+        System.out.println("Nápověda k programu:");
+        System.out.println("1. Zobrazení všech dostupných destinací - Tato možnost vypíše seznam všech dostupných destinací.");
+        System.out.println("2. Přidání destinace - Tato možnost umožní uživateli přidat novou destinaci do systému.");
+        System.out.println("3. Přidání uživatele - Tato možnost umožní uživateli přidat nového uživatele do systému.");
+        System.out.println("4. Rezervace letu - Tato možnost umožní uživateli rezervovat let na zvolenou destinaci.");
+        System.out.println("5. Zrušení destinací - Tato možnost umožní uživateli zrušit destinaci.");
+        System.out.println("6. Zrušení rezervovaných letů - Tato možnost umožní uživateli zrušit jeho rezervované lety.");
+        System.out.println("7. Vypsání rezervovaných letů - Tato možnost vypíše seznam všech rezervovaných letů uživatele.");
+        System.out.println("8. Nápověda - Tato možnost vypíše nápovědu k jednotlivým možnostem.");
+        System.out.println("9. Uložení dat - Tato možnost uloží aktuální data do souboru.");
     }
 }

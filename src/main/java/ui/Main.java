@@ -38,7 +38,7 @@ public class Main {
         System.out.println("Vyberte z následujících možností\n");
         Flight.makeFlights();
         while (true) {
-            System.out.println("1. Zobrazení všech dostupných destinací \n2. Přidání destinace \n3. Přidání uživatele\n4. Rezervace letu\n5. Zrušení letů\n6. Zrušení rezervovaných letů\n7. Vypsání rezervovaných letů\n8. Uložení dat\n0. Exit");
+            System.out.println("1. Zobrazení všech dostupných destinací \n2. Přidání destinace \n3. Přidání uživatele\n4. Rezervace letu\n5. Zrušení destinací\n6. Zrušení rezervovaných letů\n7. Vypsání rezervovaných letů\n8. Nápověda\n9. Uložení dat\n0. Exit");
 
             System.out.println("Zadejte možnost zde: ");
             String userInput = scanner.nextLine();
@@ -67,6 +67,9 @@ public class Main {
                         Passenger.displayReservedFlightsSortedByDate();
                         break;
                     case 8:
+                        util.Airport.help();
+                        break;
+                    case 9:
                         System.out.println("Chcete uložit data do formátu .txt nebo .dat (txt/bin)?");
                         String format = scanner.nextLine();
                         Airport.saveData(Main.reservationData, format, "reservedflights");

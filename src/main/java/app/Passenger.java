@@ -29,7 +29,6 @@ public class Passenger {
     static String emails = "";
     private String name;
     private String email;
-    private UUID id;
     private ArrayList<Flight> flights;
 
     /**
@@ -39,10 +38,9 @@ public class Passenger {
      * @param email Email cestujícího
      * @param uuid UUID cestujícího
      */
-    public Passenger(String name, String email, UUID uuid) {
+    public Passenger(String name, String email) {
         this.name = name;
         this.email = email;
-        this.id = UUID.randomUUID();
     }
 
     /**
@@ -55,31 +53,13 @@ public class Passenger {
     }
 
     /**
-     * Získá UUID cestujícího.
-     *
-     * @return UUID cestujícího
-     */
-    public UUID getId() {
-        return id;
-    }
-
-    /**
-     * Nastaví UUID cestujícího.
-     *
-     * @param id UUID cestujícího
-     */
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    /**
      * Přepsaná metoda toString pro třídu Passenger.
      *
      * @return Textová reprezentace objektu Passenger
      */
     @Override
     public String toString() {
-        return "Passenger [name=" + name + ", email=" + email + ", id=" + id + "]";
+        return "Passenger [name=" + name + ", email=" + email + ", id=" +"]";
     }
 
     /**
@@ -211,9 +191,7 @@ public class Passenger {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            UUID uuid = UUID.randomUUID();
-            Passenger addedPassenger = new Passenger(name, emails, UUID.randomUUID());
+            Passenger addedPassenger = new Passenger(name, emails);
             Flight chosenFlight = Main.airport.getFlight(flightDestination);
 
             if (chosenFlight != null) {
