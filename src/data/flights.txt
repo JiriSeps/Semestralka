@@ -9,7 +9,6 @@ Ottawa
 Amsterdam
 Moskva
 Bangkok
-Oslo
 Nairobi
 Rome
 Canberra
@@ -19,7 +18,11 @@ Havana
 London
 Berlin
 Madrid
-Warsaw
 Dubai
 Ankara
-Zanzibar
+Madrid
+China
+India
+Djibouti
+Somalia
+Oslo

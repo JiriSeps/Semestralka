@@ -1,2 +1,2 @@
-ahoj@cau.cz,Amsterdam,BUSINESS,22.09.2023
-ahoj@cau.cz,Rome,ECONOMY,22.08.2023
+jiri.seps@bomba.cz,Oslo,BUSINESS,20.08.2023
+haha@hehe.com,Tokyo,BUSINESS,24.08.2023

@@ -14,6 +14,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class SoundPlayer {
 
+    /**
+     * Metoda pro přehrávání zvukového souboru.
+     *
+     * @param src cesta k zvukovému souboru
+     */
     public static void play(String src) {
         CompletableFuture.runAsync(() -> {
             playMusic(src);

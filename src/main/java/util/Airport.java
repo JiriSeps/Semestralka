@@ -18,10 +18,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -110,22 +106,6 @@ public class Airport {
     }
 
     /**
-     * Vyhledá lety podle destinace a vrátí seznam letů.
-     *
-     * @param destination Destinace letu
-     * @return Seznam letů
-     */
-    public List<Flight> searchFlightsByDestination(String destination) {
-        List<Flight> flights = new ArrayList<>();
-        for (Flight flight : this.flights) {
-            if (flight.getDestination().equalsIgnoreCase(destination)) {
-                flights.add(flight);
-            }
-        }
-        return flights;
-    }
-
-    /**
      * Získá let podle destinace.
      *
      * @param flightDestination Destinace letu
@@ -140,12 +120,20 @@ public class Airport {
         return null;
     }
 
+    /**
+     * Načte a seřadí lety.
+     */
     public void loadAndSortFlights() {
         flights.clear();
 
         List<String> destinations = util.Airport.readData("./src/data/flights." + ui.Main.fileFormat);
         for (String destination : destinations) {
-            Flight flight = new Flight(destination);
+            if (destination == null || destination.trim().isEmpty()) {
+                // Skip null or empty lines
+                continue;
+            }
+
+            Flight flight = new Flight(destination.trim());  // Trim white spaces
             this.flights.add(flight);
         }
         Collections.sort(this.flights);
@@ -154,6 +142,13 @@ public class Airport {
         }
     }
 
+    /**
+     * Uloží data do souboru.
+     *
+     * @param data Data ke zápisu
+     * @param format Formát souboru (txt nebo bin)
+     * @param filename Název souboru
+     */
     public static void saveData(List<String> data, String format, String filename) {
         // Check if data is empty
         if (data.isEmpty()) {
@@ -166,11 +161,9 @@ public class Airport {
             case "txt":
                 filepath += ".txt";
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath, true))) {
-                    for (int i = 0; i < data.size(); i++) {
-                        writer.write(data.get(i));
-                        if (i < data.size() - 1) {  // Do not add new line after the last item
-                            writer.newLine();
-                        }
+                    for (String item : data) {
+                        writer.write(item);
+                        writer.newLine();  // Add new line after each item
                     }
                     System.out.println("Data úspěšně uložena do souboru: " + filepath);
                 } catch (IOException e) {
@@ -193,31 +186,29 @@ public class Airport {
         }
     }
 
-    public static void saveAllData() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Chcete uložit data do .txt nebo .dat souboru? (txt/bin)");
-        String format = scanner.nextLine();
-        // Předpokládáme, že všechna data jsou shromážděna do tohoto seznamu.
-        List<String> allData = new ArrayList<>(); // Změňte to podle toho, kde skutečně shromažďujete data.
-
-        // Pro každý typ dat zavoláme metodu saveData.
-        saveData(allData, format, "flights");
-        saveData(allData, format, "users");
-        saveData(allData, format, "reservedflights");
-    }
-
+    /**
+     * Načte data ze souboru.
+     *
+     * @param fileName Název souboru
+     * @return Seznam načtených dat
+     */
     public static List<String> readData(String fileName) {
         List<String> data = new ArrayList<>();
+        File file = new File(fileName);
+        if (!file.exists()) {
+            System.out.println("Soubor " + fileName + " nebyl nalezen. Program bude ukončen.");
+            System.exit(0);
+        }
         try {
             if (ui.Main.fileFormat.equals("txt")) {
-                Scanner scanner = new Scanner(new File(fileName));
+                Scanner scanner = new Scanner(file);
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     data.add(line);
                 }
                 scanner.close();
             } else if (ui.Main.fileFormat.equals("dat")) {
-                DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(fileName)));
+                DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
                 try {
                     while (true) {
                         String line = dis.readUTF();
@@ -230,11 +221,17 @@ public class Airport {
             }
         } catch (IOException e) {
             System.out.println("Chyba při čtení souboru: " + fileName);
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return data;
     }
 
+    /**
+     * Zapíše data do souboru.
+     *
+     * @param lines Řádky k zápisu
+     * @param fileName Název souboru
+     */
     public static void writeData(List<String> lines, String fileName) {
         try {
             if (ui.Main.fileFormat.equals("txt")) {
@@ -253,18 +250,5 @@ public class Airport {
         } catch (IOException e) {
             System.out.println("Chyba při zápisu do souboru: " + fileName);
         }
-    }
-
-    public static void help() {
-        System.out.println("Nápověda k programu:");
-        System.out.println("1. Zobrazení všech dostupných destinací - Tato možnost vypíše seznam všech dostupných destinací.");
-        System.out.println("2. Přidání destinace - Tato možnost umožní uživateli přidat novou destinaci do systému.");
-        System.out.println("3. Přidání uživatele - Tato možnost umožní uživateli přidat nového uživatele do systému.");
-        System.out.println("4. Rezervace letu - Tato možnost umožní uživateli rezervovat let na zvolenou destinaci.");
-        System.out.println("5. Zrušení destinací - Tato možnost umožní uživateli zrušit destinaci.");
-        System.out.println("6. Zrušení rezervovaných letů - Tato možnost umožní uživateli zrušit jeho rezervované lety.");
-        System.out.println("7. Vypsání rezervovaných letů - Tato možnost vypíše seznam všech rezervovaných letů uživatele.");
-        System.out.println("8. Nápověda - Tato možnost vypíše nápovědu k jednotlivým možnostem.");
-        System.out.println("9. Uložení dat - Tato možnost uloží aktuální data do souboru.");
     }
 }

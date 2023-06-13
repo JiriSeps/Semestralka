@@ -4,20 +4,17 @@
  */
 package app;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.UUID;
 import ui.Main;
-import java.nio.file.*;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
+import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
 import util.FlightClassEnum;
 
 /**
@@ -36,7 +33,6 @@ public class Passenger {
      *
      * @param name Jméno cestujícího
      * @param email Email cestujícího
-     * @param uuid UUID cestujícího
      */
     public Passenger(String name, String email) {
         this.name = name;
@@ -53,180 +49,79 @@ public class Passenger {
     }
 
     /**
-     * Přepsaná metoda toString pro třídu Passenger.
+     * Přepisuje metodu toString pro třídu Passenger.
      *
-     * @return Textová reprezentace objektu Passenger
+     * @return Řetězcová reprezentace objektu Passenger
      */
     @Override
     public String toString() {
-        return "Passenger [name=" + name + ", email=" + email + ", id=" +"]";
+        return "Passenger [name=" + name + ", email=" + email + ", id=" + "]";
     }
 
     /**
-     * Enumerace pro třídy letu (BUSINESS, ECONOMY).
+     * Metoda pro přidání nového cestujícího do systému letiště. Uživatel ručně
+     * zadává informace o cestujícím.
      */
-    /**
-     * Metoda pro přidání nového cestujícího do systému letiště.
-     */
-    public static void addNewPassenger() {
-        System.out.println("Přidejte nového cestujícího do systému letiště");
-        System.out.println("Zadejte informace o cestujících");
-        Scanner scanner = new Scanner(System.in);
+    public static String addNewPassenger(String name, String email) {
 
-        System.out.println("Zadejte jméno: ");
-        String name = scanner.nextLine();
-        String emails = "";
-        while (!emails.contains("@")) {
-            System.out.println("Zadejte email: ");
-            emails = scanner.nextLine();
+        if (!email.contains("@")) {
+            return "Nebyl zadán email!";
+        }
 
-            if (!emails.contains("@")) {
-                System.out.println("Nebyl zadán email!");
+        String passengerInfo = email;
+        Main.passengerData.add(passengerInfo);
+        return "\n" + name + " zadáno do systému.\n";
+    }
+
+    public static void bookFlight(String name, String emails, String flightDestination, String flightClassInput, String flightDate) {
+        boolean validDestination = false;
+        while (!validDestination) {
+            // Kontrola dostupných destinací
+            List<String> flightLines = util.Airport.readData("./src/data/flights." + ui.Main.fileFormat);
+            for (String line : flightLines) {
+                String[] parts = line.split(",");
+                String destination = parts[0];
+                if (destination.equals(flightDestination)) {
+                    validDestination = true;
+                    break;
+                }
+            }
+            if (!validDestination) {
+                System.out.println("Zadal jste špatnou nebo neexistující destinaci, zkuste to znovu.");
+                return;
             }
         }
 
-        String passengerInfo = emails;
-        Main.passengerData.add(passengerInfo);
+        FlightClassEnum flightClass;
+        try {
+            flightClass = FlightClassEnum.valueOf(flightClassInput.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Zadaná třída letu není platná. Defaultně nastavena na ECONOMY.");
+            flightClass = FlightClassEnum.ECONOMY;
+            flightClassInput = "ECONOMY"; // aktualizuje input uživatele na "ECONOMY"
+        }
 
-        System.out.println("\n" + name + " zadáno do systému.\n");
+        Passenger addedPassenger = new Passenger(name, emails);
+        Flight chosenFlight = Main.airport.getFlight(flightDestination);
+
+        if (chosenFlight != null) {
+            Main.airport.bookPassengerOnFlight(addedPassenger, chosenFlight);
+            System.out.println(addedPassenger.getName() + " zadal let do " + flightDestination + " s třídou " + flightClassInput + " a datem " + flightDate + "\n");
+
+            String flightData = emails + "," + flightDestination + "," + flightClassInput + "," + flightDate;
+            Main.reservationData.add(flightData);
+
+        } else {
+            System.out.println("Nenalezeny lety do " + flightDestination + ".\n");
+        }
         System.out.println("Co chcete vybrat dál? Vyberte číslo od 0-6: \n");
     }
 
     /**
-     * Metoda pro rezervaci letu cestujícího.
+     * Metoda pro zrušení rezervovaných letů cestujícího. Uživatel ručně zadává
+     * email cestujícího, destinaci letu, třídu letu a datum.
      */
-    public static void bookFlight() {
-        System.out.println("Rezervace letu");
-        System.out.println("Jste již uživatelem této aerolinky? (Y/N)");
-        Scanner scanner = new Scanner(System.in);
-        String answer = scanner.nextLine().toUpperCase();
-
-        if (answer.equals("N")) {
-            addNewPassenger();
-            return;
-        }
-
-        System.out.println("Zadejte údaje cestujícího");
-        System.out.println("Zadejte jméno: ");
-        String name = scanner.nextLine();
-        String emails = "";
-
-        boolean emailExists = false;
-        while (!emailExists) {
-            System.out.println("Zadejte email: ");
-            emails = scanner.nextLine();
-
-            List<String> lines = util.Airport.readData("./src/data/users." + ui.Main.fileFormat);
-            for (String line : lines) {
-                String[] parts = line.split(",");
-                String email = parts[0];
-                if (email.equals(emails)) {
-                    emailExists = true;
-                    break;
-                }
-            }
-            if (!emailExists) {
-                System.out.println("Zadal jste špatný nebo neplatný email, (1) zkuste to znovu, nebo (2) založte účet (1/2)");
-                String option = scanner.nextLine();
-                
-                if ("2".equals(option)) {
-                    addNewPassenger();
-                    return;
-                }
-            }
-
-            System.out.println("\n Vyberte si z následujících letů: ");
-            Main.airport.loadAndSortFlights();
-            System.out.println("Zadejte destinaci : ");
-            String flightDestination = scanner.nextLine();
-
-            System.out.println("Zadejte třídu letu (BUSINESS nebo ECONOMY): \n");
-            String flightClassInput = scanner.nextLine();
-            FlightClassEnum flightClass;
-            try {
-                flightClass = FlightClassEnum.valueOf(flightClassInput.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Zadaná třída letu není validní. Defaultně nastavena na ECONOMY.");
-                flightClass = FlightClassEnum.ECONOMY;
-                flightClassInput = "ECONOMY"; // aktualizuje input uživatele na "ECONOMY"
-            }
-
-            // Vyberte si měsíc odletu
-            System.out.println("Zadejte měsíc odletu (srpen, zari, rijen) (prosim nepouzivej diakritiku, konzole jí nerozumí): ");
-            String inputMonth = scanner.nextLine();
-            String monthNumber;
-            switch (inputMonth.trim().toLowerCase()) {
-                case "srpen":
-                    monthNumber = "08";
-                    break;
-                case "zari":
-                    monthNumber = "09";
-                    break;
-                case "rijen":
-                    monthNumber = "10";
-                    break;
-                default:
-                    System.out.println("Zadal jste špatný měsíc, nebo jste použili diakritiku ve vaší odpovědi.");
-                    return;
-            }
-
-            String flightDate = "";
-            try {
-                Path path = Paths.get("./src/data/dates.txt");
-                List<String> allDates = Files.readAllLines(path);
-                List<String> possibleDates = allDates.stream().filter(d -> d.substring(3, 5).equals(monthNumber)).collect(Collectors.toList());
-
-                // Print available dates
-                System.out.println("Možné datumy v " + inputMonth + ":");
-                possibleDates.forEach(System.out::println);
-
-                System.out.println("Zadejte datum letu (DD.MM.YYYY): ");
-                flightDate = scanner.nextLine();
-                String datePattern = "\\b\\d{1,2}\\.\\d{1,2}\\.\\d{4}\\b"; //regulární výraz
-                if (!flightDate.matches(datePattern)) {
-                    System.out.println("Zadané datum není ve správném formátu (DD.MM.YYYY).");
-                    return;
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Passenger addedPassenger = new Passenger(name, emails);
-            Flight chosenFlight = Main.airport.getFlight(flightDestination);
-
-            if (chosenFlight != null) {
-                Main.airport.bookPassengerOnFlight(addedPassenger, chosenFlight);
-                System.out.println(addedPassenger.getName() + " zadal let do " + flightDestination + " s třídou " + flightClassInput + " a datem " + flightDate + "\n");
-
-                String flightData = emails + "," + flightDestination + "," + flightClassInput + "," + flightDate;
-                Main.reservationData.add(flightData);
-
-            } else {
-                System.out.println("Nenalezeny lety do " + flightDestination + ".\n");
-            }
-            System.out.println("Co chcete vybrat dál? Vyberte číslo od 0-6: \n");
-        }
-
-    }
-
-    public static void cancelReservedFlights() {
-        System.out.println("Zrušení rezervovaných letů");
-        System.out.println("Zadejte svůj email: ");
-        Scanner scanner = new Scanner(System.in);
-        String inputEmail = scanner.nextLine();
-
-        // Vyzve uživatele, aby zadali destinaci
-        System.out.println("Zadejte destinaci letu, kterou chcete zrušit: ");
-        String inputDestination = scanner.nextLine();
-
-        // Vyzve uživatele, aby zadali třídu letu
-        System.out.println("Zadejte třídu letu, kterou chcete zrušit: ");
-        String inputFlightClass = scanner.nextLine();
-
-        System.out.println("Zadejte datum odletu ve formátu DD.MM.YYYY: ");
-        String inputDate = scanner.nextLine();
-
-        String emailAndFlightData = inputEmail + "," + inputDestination + "," + inputFlightClass + "," + inputDate;
+    public static String cancelReservedFlights(String emailAndFlightData) {
 
         List<String> lines = util.Airport.readData("./src/data/reservedflights." + ui.Main.fileFormat);
         int flightIndex = lines.indexOf(emailAndFlightData);
@@ -237,8 +132,14 @@ public class Passenger {
         } else {
             System.out.println("Tento let nebyl nalezen v našem systému");
         }
+        return null;
     }
 
+    /**
+     * Metoda pro získání všech rezervovaných letů a seřazení podle data.
+     *
+     * @return Seznam rezervovaných letů seřazených podle data
+     */
     public static List<ReservedFlight> getSortedFlights() {
         String path = "./src/data/reservedflights." + ui.Main.fileFormat;
         List<ReservedFlight> flights = new ArrayList<>();
@@ -257,6 +158,10 @@ public class Passenger {
         return flights;
     }
 
+    /**
+     * Metoda pro zobrazení všech rezervovaných letů seřazených podle data.
+     * Vypíše data rezervovaných letů do konzole.
+     */
     public static void displayReservedFlightsSortedByDate() {
         List<String> lines = util.Airport.readData("./src/data/reservedflights." + Main.fileFormat);
 
@@ -273,5 +178,47 @@ public class Passenger {
         for (ReservedFlight flight : flights) {
             System.out.println(flight.getEmail() + ", " + flight.getDestination() + ", " + flight.getFlightClass() + ", " + flight.getDate().format(DateTimeFormatter.ofPattern("d.M.yyyy")));
         }
+    }
+
+    public static String checkEmail(String emails) {
+        List<String> lines = util.Airport.readData("./src/data/users." + ui.Main.fileFormat);
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            String email = parts[0];
+            if (email.equals(emails)) {
+                return email;
+            }
+        }
+        return null;
+    }
+
+    public static boolean checkDate(String flightDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.M.yyyy");
+        LocalDate parsedDate;
+        try {
+            parsedDate = LocalDate.parse(flightDate, formatter);
+        } catch (DateTimeParseException e) {
+            System.out.println("Zadané datum není ve správném formátu (DD.MM.YYYY).");
+            return false;
+        }
+
+        // Kontrola platnosti dnů v měsíci a přestupných let
+        if (parsedDate.getMonth() == Month.FEBRUARY && parsedDate.getDayOfMonth() > 29) {
+            System.out.println("Únor nemůže mít více než 29 dní, aniž by to byl přestupný rok.");
+            return false;
+        } else if (parsedDate.getMonth() == Month.FEBRUARY && parsedDate.getDayOfMonth() > 28 && !Year.isLeap(parsedDate.getYear())) {
+            System.out.println("Únor nemůže mít 29 dní, pokud to není přestupný rok.");
+            return false;
+        } else if (parsedDate.getDayOfMonth() == 31 && (parsedDate.getMonth() == Month.APRIL || parsedDate.getMonth() == Month.JUNE || parsedDate.getMonth() == Month.SEPTEMBER || parsedDate.getMonth() == Month.NOVEMBER)) {
+            System.out.println(parsedDate.getMonth().getDisplayName(TextStyle.FULL, new Locale("cs", "CZ")) + " nemůže mít 31 dní.");
+            return false;
+        }
+
+        LocalDate currentDate = LocalDate.now();
+        if (parsedDate.isBefore(currentDate.plusDays(3))) {
+            System.out.println("Zadané datum je méně než 3 dny od dnešního data. Vyberte jiné datum.");
+            return false;
+        }
+        return true;
     }
 }
