@@ -221,4 +221,13 @@ public class Passenger {
         }
         return true;
     }
+
+    public static String destinationCheck(String flightDestination) {
+        List<String> destinations = util.Airport.readData("./src/data/flights." + ui.Main.fileFormat);
+
+        if (destinations.contains(flightDestination)) {
+            return flightDestination;
+        }
+        return null;
+    }
 }

@@ -178,6 +178,13 @@ public class Main {
         Main.airport.loadAndSortFlights();
         System.out.println("Zadejte destinaci : ");
         String flightDestination = scanner.nextLine();
+        
+        String destinationCheck = Passenger.destinationCheck(flightDestination);
+        
+        if (destinationCheck == null) {
+            System.out.println("Zadaná destinace nebyla nalezena. Zadejte prosím destinaci znovu:");
+            return;
+        }
         System.out.println("Zadejte třídu letu (BUSINESS nebo ECONOMY): ");
         String flightClassInput = scanner.nextLine();
         System.out.println("Zadejte datum letu (DD.MM.YYYY): ");
